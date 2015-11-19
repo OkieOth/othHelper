@@ -25,10 +25,14 @@ public class Test_StopJettyTimerThread {
     }
 
     @Test
-    public void testTimeout() {
-        StopJettyTimerThread x = new StopJettyTimerThread(null, 2);
+    public void testTimeout() throws Exception {
         long start = new Date().getTime();
-        x.run();
+        StopJettyTimerThread x = new StopJettyTimerThread(null, 2);
+        x.start();
+        while (x.isAlive()) {
+            System.out.println("wait ...");
+            Thread.sleep(100);
+        }
         long end = new Date().getTime();
         long diff = end - start;
         
