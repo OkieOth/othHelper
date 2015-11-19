@@ -83,7 +83,7 @@ public class PidFile {
         }        
     } 
     
-    private String getPid() {
+    public static String getPid() {
         String pidAndStuff = ManagementFactory.getRuntimeMXBean().getName();
         int indexAt = pidAndStuff.indexOf("@");
         String pid = pidAndStuff.substring(0,indexAt);

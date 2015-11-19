@@ -10,13 +10,15 @@ Unless required by applicable law or agreed to in writing, software distributed 
 "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the License for the
 specific language governing permissions and limitations under the License.
  */
-package de.othsoft.helper.main;
+package de.othsoft.helper.jetty;
 
 import de.othsoft.helper.base.Identifier;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.CommandLineParser;
 import org.apache.commons.cli.DefaultParser;
 import org.apache.commons.cli.HelpFormatter;
+import org.apache.commons.cli.MissingArgumentException;
+import org.apache.commons.cli.MissingOptionException;
 import org.apache.commons.cli.Option;
 import org.apache.commons.cli.Options;
 import org.slf4j.Logger;
@@ -27,17 +29,35 @@ import org.slf4j.LoggerFactory;
  * @author eiko
  */
 public class EmbeddedJettyRunOptions {
-    private Options options;
+    private final Options options;
     private CommandLine cmd;
+    private String mainClassName;
     
-    public EmbeddedJettyRunOptions() {
+    private boolean preventExit=false;
+    
+    public EmbeddedJettyRunOptions(String mainClassName) {
         options = createOptions();
+        this.mainClassName = mainClassName;
     }
     
-    public void printUsageAndExit(Options options) {
+    /**
+     * only for test cases
+     * @param b 
+     */
+    void setPreventExit(boolean b) {
+        this.preventExit = b;
+    }
+    
+    
+    void printUsage() {
         HelpFormatter formatter = new HelpFormatter();
-        formatter.printHelp("java de.othserv.examples.jetty.MemcachedServer", options);
-        System.exit(1);
+        formatter.printHelp("java "+mainClassName, options);        
+    }
+    
+    private void printUsageAndExit() {
+        printUsage();
+        if (!this.preventExit)
+            System.exit(1);
     }
 
     private Options createOptions() {
@@ -49,39 +69,54 @@ public class EmbeddedJettyRunOptions {
         options.addOption("a", "address", true, "the address the server is bind on (default all)");
         options.addOption("i", "identifier", true, "optional identifier for log output");
         options.addOption("f", "pidfile", true, "pid file to use");
-        options.addOption("?", "help", false, "show help");
+        options.addOption("t", "time", false, "number of seconds until the server close itself");
+        options.addOption("?", "help", false, "show this message");
         return options;
     }
     
     /**
      * 
      * @param args command line arguments
-     * @return false if parse goes wrong
      */
-    public boolean parse(String[] args) {
+    public void parse(String[] args) {
         try {
             CommandLineParser parser = new DefaultParser();
-            CommandLine cmd = parser.parse(options, args);
-            return true;
+            cmd = parser.parse(options, args);
+            if (hasOption("?"))
+                printUsageAndExit();
+        }
+        catch(MissingOptionException|MissingArgumentException e) {
+            printUsageAndExit();            
         }
         catch(Exception e) {
-            logger.error("<<{}>> {}: ", Identifier.getInst().getName(), e.getClass().getName(), e.getMessage());
-            return false;
+            logger.error("<<{}>> {}: {}", Identifier.getInst().getName(), e.getClass().getName(), e.getMessage());
+            if (!this.preventExit)
+                System.exit(1);
         }
     }
     
     public void ifMissOptionPrintUsageAndExit(String optionStr) {
-        if (cmd.hasOption(optionStr)) {
-                printUsageAndExit(options);
+        if (cmd==null) {
+            logger.error("<<{}>> cmd is null, maybe the options are not parsed", Identifier.getInst().getName());
+        }        
+        if (cmd==null || (!cmd.hasOption(optionStr))) {
+            logger.error("<<{}>> missing option {}, so I exit", Identifier.getInst().getName(),optionStr);
+            printUsageAndExit();
         }
     }
     
     public String getValue(String optionStr) {
-        return cmd.getOptionValue(optionStr);
+        if (cmd==null) {
+            logger.error("<<{}>> cmd is null, maybe the options are not parsed", Identifier.getInst().getName());
+        }
+        return cmd==null ? null : cmd.getOptionValue(optionStr);
     }
 
     public boolean hasOption(String optionStr) {
-        return cmd.hasOption(optionStr);
+        if (cmd==null) {
+            logger.error("<<{}>> cmd is null, maybe the options are not parsed", Identifier.getInst().getName());
+        }
+        return cmd==null? false : cmd.hasOption(optionStr);
     }
 
     private static Logger logger = LoggerFactory.getLogger(EmbeddedJettyRunOptions.class);

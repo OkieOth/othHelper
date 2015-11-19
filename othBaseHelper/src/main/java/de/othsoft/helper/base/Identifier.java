@@ -14,11 +14,11 @@ public class Identifier {
     private final String nameStr;
     
     private Identifier(Class mainClass) {
-        nameStr = mainClass.getName();
+        nameStr = mainClass.getSimpleName();
     }
     
     private Identifier(Class mainClass,String ext) {
-        nameStr = mainClass.getName()+"_"+ext;        
+        nameStr = mainClass.getSimpleName()+"_"+ext;        
     }
     
     public static void init(Class mainClass) {
