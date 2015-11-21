@@ -69,7 +69,7 @@ public class EmbeddedJettyRunOptions {
         options.addOption("a", "address", true, "the address the server is bind on (default all)");
         options.addOption("i", "identifier", true, "optional identifier for log output");
         options.addOption("f", "pidfile", true, "pid file to use");
-        options.addOption("t", "time", false, "number of seconds until the server close itself");
+        options.addOption("t", "time", true, "number of seconds until the server close itself");
         options.addOption("?", "help", false, "show this message");
         return options;
     }

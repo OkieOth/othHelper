@@ -53,7 +53,11 @@ public class PidFile {
         return new PidFile(pidFileDirectory,pidFileName);
     }
 
-    void createPidFileAndExitWhenAlreadyExist() {
+    /**
+     * this funtion stop the execution of program if the given pid file already
+     * exists
+     */
+    public void createPidFileAndExitWhenAlreadyExist() {
         File f = new File(this.pathToPidFile);
         if (f.exists()) {
             logger.error("<<{}>> error pid file ({}) exists, does the process already running?",
@@ -63,7 +67,10 @@ public class PidFile {
         createFileNow(f);
     }
 
-    void createPidFile() {
+    /**
+     * create a new pid file
+     */
+    public void createPidFile() {
         File f = new File(this.pathToPidFile);
         createFileNow(f);
     }
