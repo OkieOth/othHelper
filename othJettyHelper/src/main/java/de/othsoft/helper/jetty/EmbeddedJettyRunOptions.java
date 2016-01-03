@@ -74,6 +74,10 @@ public class EmbeddedJettyRunOptions {
         return options;
     }
     
+    public void addOption (String shortStr, String longStr,boolean hasValue,String descr) {
+        options.addOption(shortStr,longStr,hasValue,descr);
+    }
+    
     /**
      * 
      * @param args command line arguments
